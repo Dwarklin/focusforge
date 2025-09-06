@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI-Powered Focus Forge - Smart Schedule Management</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts for a modern look (optional, but enhances "fancy") -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Custom CSS for "fancy" elements not easily achievable with Tailwind */
+        :root {
+            --primary-bg: #1a1a2e; /* Dark Blue */
+            --secondary-bg: #16213e; /* Slightly lighter dark blue */
+            --accent-color: #e07b39; /* Orange */
+            --text-color: #e0e0e0; /* Light gray */
+            --card-bg: rgba(255, 255, 255, 0.08); /* Semi-transparent white for glassmorphism */
+            --card-border: rgba(255, 255, 255, 0.15);
+            --gradient-start: #4a00e0; /* Deep purple */
+            --gradient-end: #8e2de2; /* Lighter purple */
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--primary-bg);
+            color: var(--text-color);
+            overflow-x: hidden; /* Prevent horizontal scroll due to background elements */
+            position: relative;
+            min-height: 100vh;
+        }
+
+        /* Dynamic Background Elements */
+        .background-gradient {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at top left, var(--gradient-start) 0%, transparent 40%),
+                        radial-gradient(circle at bottom right, var(--gradient-end) 0%, transparent 40%);
+            opacity: 0.3;
+            z-index: -2;
+            pointer-events: none;
+            animation: subtleGradientShift 30s ease infinite alternate;
+        }
+
+        @keyframes subtleGradientShift {
+            0% {
+                transform: scale(1);
+                opacity: 0.3;
+            }
+            50% {
+                transform: scale(1.05);
+                opacity: 0.4;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 0.3;
+            }
+        }
+
+        .background-shape {
+            position: fixed;
+            background: linear-gradient(135deg, rgba(var(--gradient-start), 0.7), rgba(var(--gradient-end), 0.7));
+            filter: blur(80px);
+            border-radius: 50%;
+            opacity: 0.4;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .shape-1 {
+            width: 300px;
+            height: 300px;
+            top: -100px;
+            left: -100px;
+            animation: floatShape 15s ease-in-out infinite alternate;
+        }
+
+        .shape-2 {
+            width: 400px;
+            height: 400px;
+            bottom: -150px;
+            right: -150px;
+            animation: floatShape 20s ease-in-out infinite reverse;
+        }
+
+        @keyframes floatShape {
+            0% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(20px, 30px) scale(1.05); }
+            100% { transform: translate(0, 0) scale(1); }
+        }
+
+        /* Glassmorphism card effect */
+        .glass-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--card-border);
+            backdrop-filter: blur(10px); /* This is the key for glassmorphism */
+            -webkit-backdrop-filter: blur(10px); /* Safari support */
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        /* Custom scrollbar for aesthetic appeal */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--secondary-bg);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--accent-color);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #f0984a;
+        }
+
+        /* Active tab styling */
+        .tab-button.active {
+            border-bottom: 2px solid var(--accent-color);
+            color: var(--accent-color);
+            font-weight: 600;
+        }
+
+        /* Notification Toast */
+        .toast {
+            visibility: hidden;
+            min-width: 250px;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 8px;
+            padding: 16px;
+            position: fixed;
+            z-index: 1000;
+            left: 50%;
+            transform: translateX(-50%);
+            bottom: 30px;
+            font-size: 17px;
+            opacity: 0;
+            transition: opacity 0.5s, bottom 0.5s;
+        }
+
+        .toast.show {
+            visibility: visible;
+            opacity: 1;
+            bottom: 50px;
+        }
+
+        /* Task priority styling */
+        .priority-high { color: #ef4444; } /* Red */
+        .priority-medium { color: #f97316; } /* Orange */
+        .priority-low { color: #22c55e; } /* Green */
+
+        /* SVG Icon styling */
+        .icon {
+            width: 1.25rem; /* 20px */
+            height: 1.25rem; /* 20px */
+            fill: currentColor;
+            vertical-align: middle;
+        }
+    </style>
+</head>
+<body class="bg-primary-bg text-text-color min-h-screen flex flex-col">
+
+    <!-- Dynamic Background Elements -->
+    <div class="background-gradient"></div>
+    <div class="background-shape shape-1"></div>
+    <div class="background-shape shape-2"></div>
+
+    <!-- Main Application Container -->
+    <div class="relative z-10 flex flex-col flex-grow max-w-4xl mx-auto w-full p-4 sm:p-6 lg:p-8">
+
+        <!-- Header -->
+        <header class="flex items-center justify-between py-4 mb-6">
+            <h1 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight flex items-center">
+                <svg class="icon mr-2 text-accent-color" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                    <path fill-rule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zM12.75 6a.75.75 极 00-1.5 0v6c0 .414.168.81.44 1.08l3.75 3.75a.75.75 0 101.06-1.06L13.5 11.25V6z" clip-rule="evenodd" />
+                </svg>
+                Focus Forge
+            </h1>
+            <div class="flex items-center space-x-2">
+                <!-- Analytics Link -->
+                <a href="analytics.html" class="p-2 rounded-full hover:bg-white hover:bg-opacity-10 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-accent-color" title="Analytics">
+                    <svg class="icon text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                        <path fill-rule="evenodd" d="M3 6a3 3 0 013-3h12a3 3 0 013 3v12a3 3 0 01-3 3H6a3 3 0 01-3-3V6zm4.5 7.5a.75.75 0 01.75.75v2.25a.75.75 0 01-1.5 0v-2.25a.75.75 0 01.75-.75zm3.75-1.5a.75.75 0 00-1.5 0v4.5a.75.75 0 001.5 0V12zm3-3a.75.75 0 00-1.5 0v7.5a.75.75 0 001.5 0V9zm3 6a.75.75 0 00-1.5 0v1.5a.75.75 0 001.5 0V15z" clip-rule="evenodd" />
+                    </svg>
+                </a>
+                <!-- Tutorial Link -->
+                <a href="tutorial.html" class="p-2 rounded-full hover:bg-white hover:bg-opacity-10 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-accent-color" title="Tutorial">
+                    <svg class="icon text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                        <path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 01.67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 11-.671-1.34l.041-.022zM12 9a.75.75 0 100-1.5.75.75 0 000 1.5z" clip-rule="evenodd" />
+                    </svg>
+                </a>
+                <!-- User/Settings Icon (Placeholder) -->
+            <button class="p-2 rounded-full hover:bg-white hover:bg-opacity-10 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-accent-color">
+                <svg class="icon text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                    <path fill-rule="evenodd" d="M18.685 19.027a.75.75 0 01.02.834c.22.447.27.95.122 1.405-.441 1.353-1.852 2.074-3.363 1.808-1.521-.272-2.79-1.352-3.535-2.762l-.245-.45a9.75 9.75 0 01.356-6.522c1.196-.257 1.817.514 2.257 1.264.17.298.24.62.24.945 0 .183-.024.363-.072.536l-.004.01c-.22.66-.543 1.299-.963 1.848-.19.248-.377.48-.56.704a.75.75 0 00.106 1.092l.797.697c.579.504 1.124 1.096 1.576 1.776zM17.25 7.5a4.5 4.5 0 10-9 0 4.5 4.5 0 009 0z" clip-rule="evenodd" />
+                </svg>
+            </button>
+        </header>
+
+        <!-- Tab Navigation -->
+        <nav class="flex justify-center mb-6 bg-secondary-bg rounded-lg p-1 glass-card">
+            <button id="tasksTab" class="tab-button flex-1 py-3 px-4 text-center text-lg rounded-md transition-all duration-300 hover:bg-white hover:bg-opacity-10 active" onclick="showSection('tasks')">
+                <span class="hidden sm:inline">My Tasks</span>
+                <svg class="icon inline-block sm:hidden" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                    <path fill-rule="evenodd" d="M3.75 6.75a.75.75 0 01.75-.75h16.5a.75.75 0 010 1.5H4.5a.75.75 0 01-.75-.75zM3.75 11.25a.75.75 0 01.75-.75h16.5a.75.75 0 010 1.5H4.5a.75.75 0 01-.75-.75zM3.75 15.75a.75.75 0 01.75-.75h16.5a.75.75 0 010 1.5H4.5a.75.75 0 01-.75-.75z" clip-rule="evenodd" />
+                </svg>
+            </button>
+            <button id="scheduleTab" class="tab-button flex-1 py-3 px-4 text-center text-lg rounded-md transition-all duration-300 hover:bg-white hover:bg-opacity-10" onclick="showSection('schedule')">
+                <span class="hidden sm:inline">AI Schedule</span>
+                <svg class="icon inline-block sm:hidden" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                    <path fill-rule="evenodd" d="M6.75 2.25A.75.75 0 017.5 3v1.5h9V3A.75.75 0 0118 3v1.5h.75a3 3 0 013 3v11.25a3 3 0 01-3 3H5.25a3 3 0 01-3-3V7.5a3 3 0 013-3H6.75V3zm13.5 3a1.5 1.5 0 00-1.5-1.5H5.25a1.5 1.5 0 00-1.5 1.5V7.5h17.25V5.25zm-16.5 9.75a.75.75 0 01.75-.75h3a.75.75 0 01.75.75v3a.75.75 0 01-.75.75h-3a.75.75 0 01-.75-.75v-3z" clip-rule="evenodd" />
+                </svg>
+            </button>
+        </nav>
+
+        <!-- Main Content Area -->
+        <main class="flex-grow">
+
+            <!-- Tasks Section -->
+            <section id="tasksSection" class="active-section space-y-6">
+                <div class="glass-card p-6 rounded-xl shadow-lg">
+                    <h2 class="text-2xl font-semibold mb-4 text-white">Add New Task</h2>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <input type="text" id="taskName" placeholder="Task Name" class="col-span-full sm:col-span-2 lg:col-span-2 p-3 rounded-lg bg-white bg-opacity-10 border border-card-border focus:outline-none focus:ring-2 focus:ring-accent-color text-text-color placeholder-gray-400">
+                        <select id="taskPriority" class="p-3 rounded-lg bg-white bg-opacity-10 border border-card-border focus:outline-none focus:ring-2 focus:ring-accent-color text-text-color">
+                            <option value="High">High Priority</option>
+                            <option value="Medium" selected>Medium Priority</option>
+                            <option value="Low">Low Priority</option>
+                        </select>
+                        <input type="number" id="taskDuration" placeholder="Duration (min)" min="10" step="10" value="60" class="p-3 rounded-lg bg-white bg-opacity-10 border border-card-border focus:outline-none focus:ring-2 focus:ring-accent-color text-text-color placeholder-gray-400">
+                        <button id="addTaskBtn" class="col-span-full sm:col-span-2 lg:col-span-1 bg-accent-color hover:bg-opacity-90 text-white font-bold py-3 px-6 rounded-lg transition-all duration-300 flex items-center justify-center">
+                            <svg class="icon mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                                <path fill-rule="evenodd" d="M12 3.75a.75.75 0 01.75.75v6.75h6.75a.75.75 0 010 1.5h-6.75v6.75a.75.75 0 01-1.5 0v-6.75H4.5a.75.75 0 010-1.5h6.75V4.5a.75.75 0 01.75-.75z" clip-rule="evenodd" />
+                            </svg>
+                            Add Task
+                        </button>
+                    </div>
+                </div>
+
+                <div class="glass-card p-6 rounded-xl shadow-lg">
+                    <h2 class="text-2xl font-semibold mb-4 text-white">My Tasks</h2>
+                    <ul id="taskList" class="space-y-3">
+                        <!-- Task items will be injected here by JavaScript -->
+                    </ul>
+                    <p id="noTasksMessage" class="text-gray-400 text-center mt-4">No tasks added yet. Let's get productive!</p>
+                </div>
+            </section>
+
+            <!-- Schedule Section -->
+            <section id="scheduleSection" class="hidden space-y-6">
+                <div class="glass-card p-6 rounded-xl shadow-lg">
+                    <h2 class="text-2xl font-semibold mb-4 text-white">Scheduling Preferences</h2>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label for="workStartTime" class="block text-sm font-medium text-gray-300 mb-1">Work Start Time</label>
+                            <input type="time" id="workStartTime" value="09:00" class="w-full p-3 rounded-lg bg-white bg-opacity-10 border border-card-border focus:outline-none focus:ring-2 focus:ring-accent-color text-text-color">
+                        </div>
+                        <div>
+                            <label for="workEndTime" class="block text-sm font-medium text-gray-300 mb-1">Work End Time</label>
+                            <input type="time" id="workEndTime" value="17:00" class="w-full p-3 rounded-lg bg-white bg-opacity-10 border border-card-border focus:outline-none focus:ring-2 focus:ring-accent-color text-text-color">
+                        </div>
+                        <div class="col-span-full">
+                            <label for="breakDuration" class="block text-sm font-medium text-gray-300 mb-1">Break Duration (min)</label>
+                            <input type="number" id="breakDuration" value="30" min="10" step="10" class="w-full p-3 rounded-lg bg-white bg-opacity-10 border border-card-border focus:outline-none focus:ring-2 focus:ring-accent-color text-text-color">
+                        </div>
+                    </div>
+                    <button id="generateScheduleBtn" class="w-full bg-gradient-to-r from-purple-600 to-indigo-700 hover:from-purple-700 hover:to-indigo-800 text-white font-bold py-3 px-6 rounded-lg transition-all duration-300 flex items-center justify-center">
+                        <svg class="icon mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                            <path fill-rule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zm-2.625 7.5a.75.75 0 100 1.5h4.25a.75.75 0 100-1.5h-4.25zm-.224 4.316a.75.75 0 00.975-1.133l-.01-.01c-.195-.195-.445-.293-.708-.344-.263-.05-.53-.03-.776.046a.75.75 0 00.519 1.442zm4.905-2.713a.75.75 0 00-1.133-.975l-.01-.01c.195-.195.445-.293.708-.344.263-.05.53-.03.776.046a.75.75 0 00-.519 1.442z" clip-rule="evenodd" />
+                        </svg>
+                        Generate AI Schedule
+                    </button>
+                </div>
+
+                <div class="glass-card p-6 rounded-xl shadow-lg">
+                    <h2 class="text-2xl font-semibold mb-4 text-white">Today's Schedule</h2>
+                    <div id="scheduleDisplay" class="space-y-4">
+                        <p id="noScheduleMessage" class="text-gray-400 text-center">Generate a schedule to see your optimized day!</p>
+                        <!-- Schedule items will be injected here by JavaScript -->
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Floating Action Button (FAB) for adding tasks -->
+        <button id="fabAddTask" class="fixed bottom-6 right-6 lg:bottom-8 lg:right-8 bg-accent-color hover:bg-opacity-90 text-white p-4 rounded-full shadow-lg transition-all duration-300 transform hover:scale-110 focus:outline-none focus:ring-4 focus:ring-accent-color focus:ring-opacity-50">
+            <svg class="icon w-7 h-7" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                <path fill-rule="evenodd" d="M12 3.75a.75.75 0 01.75.75v6.75h6.75a.75.75 0 010 1.5h-6.75v6.75a.75.75 0 01-1.5 0v-6.75H4.5a.75.75 0 010-1.5h6.75V4.5a.75.75 0 01.75-.75z" clip-rule="evenodd" />
+            </svg>
+        </button>
+
+        <!-- Notification Toast -->
+        <div id="toast" class="toast"></div>
+
+    </div> <!-- End Main Application Container -->
+
+    <script>
+        // --- Global State ---
+        let tasks = JSON.parse(localStorage.getItem('timeflowTasks')) || [];
+        let schedule = [];
+
+        // --- DOM Elements ---
+        const tasksTab = document.getElementById('tasksTab');
+        const scheduleTab = document.getElementById('scheduleTab');
+        const tasksSection = document.getElementById('tasksSection');
+        const scheduleSection = document.getElementById('scheduleSection');
+
+        const taskNameInput = document.getElementById('taskName');
+        const taskPriorityInput = document.getElementById('taskPriority');
+        const taskDurationInput = document.getElementById('taskDuration');
+        const addTaskBtn = document.getElementById('addTaskBtn');
+        const taskList = document.getElementById('taskList');
+        const noTasksMessage = document.getElementById('noTasksMessage');
+
+        const workStartTimeInput = document.getElementById('workStartTime');
+        const workEndTimeInput = document.getElementById('workEndTime');
+        const breakDurationInput = document.getElementById('breakDuration');
+        const generateScheduleBtn = document.getElementById('generateScheduleBtn');
+        const scheduleDisplay = document.getElementById('scheduleDisplay');
+        const noScheduleMessage = document.getElementById('noScheduleMessage');
+
+        const fabAddTask = document.getElementById('fabAddTask');
+        const toastElement = document.getElementById('toast');
+
+        // --- Utility Functions ---
+        function showToast(message, duration = 3000) {
+            toastElement.textContent = message;
+            toastElement.classList.add('show');
+            setTimeout(() => {
+                toastElement.classList.remove('show');
+            }, duration);
+        }
+
+        function saveTasks() {
+            localStorage.setItem('timeflowTasks', JSON.stringify(tasks));
+        }
+
+        function formatTime(date) {
+            return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        }
+
+        // --- UI Rendering Functions ---
+        function renderTasks() {
+            taskList.innerHTML = '';
+            if (tasks.length === 0) {
+                noTasksMessage.classList.remove('hidden');
+                return;
+            }
+            noTasksMessage.classList.add('hidden');
+
+            tasks.forEach(task => {
+                const taskItem = document.createElement('li');
+                taskItem.className = 'glass-card p-4 rounded-lg flex items-center justify-between transition-all duration-200 hover:scale-[1.01]';
+                taskItem.innerHTML = `
+                    <div class="flex items-center flex-grow min-w-0">
+                        <input type="checkbox" ${task.completed ? 'checked' : ''} data-id="${task.id}" class="form-checkbox h-5 w-5 text-accent-color rounded border-gray-600 focus:ring-accent-color mr-3">
+                        <div class="flex-grow">
+                            <span class="block text-lg font-medium ${task.completed ? 'line-through text-gray-500' : 'text-white'} truncate" title="${task.name}">${task.name}</span>
+                            <div class="flex items-center text-sm text-gray-400 mt-1">
+                                <span class="mr-2 ${getPriorityClass(task.priority)} font-semibold">${task.priority}</span>
+                                <span class="flex items-center">
+                                    <svg class="icon w-4 h-4 mr-1 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zM12.75 6a.75.75 0 00-1.5 0v6c0 .414.168.81.44 1.08l3.75 3.75a.75.75 0 101.06-1.06L13.5 11.25V6z" clip-rule="evenodd" />
+                                    </svg>
+                                    ${task.duration} min
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex space-x-2 ml-4">
+                        <button data-id="${task.id}" class="edit-task-btn p-2 rounded-full hover:bg-white hover:bg-opacity-10 text-gray-300 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-accent-color">
+                            <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M21.731 2.269a2.625 2.625 0 00-3.712 0l-1.187 1.187 3.712 3.712 1.187-1.187a2.625 2.625 0 000-3.712zM19.513 8.199l-3.712-3.712-8.4 8.4a5.25 5.25 0 00-1.32 2.07l-.707 3.535a.75.75 0 00.926.926l3.535-.707a5.25 5.25 0 002.07-1.32l8.4-8.4z" />
+                                <path d="M5.25 5.25a3 3 0 00-3 3v10.5a3 3 0 003 3h10.5a3 3 0 003-3V13.5a.75.75 0 00-1.5 0v5.25a1.5 1.5 0 01-1.5 1.5H5.25a1.5 1.5 0 01-1.5-1.5V8.25a1.5 1.5 0 011.5-1.5h5.25a.75.75 0 000-1.5H5.25z" />
+                            </svg>
+                        </button>
+                        <button data-id="${task.id}" class="delete-task-btn p-2 rounded-full hover:bg-red-600 hover:bg-opacity-20 text-red-400 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-red-500">
+                            <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                                <path fill-rule="evenodd" d="M16.5 4.478v.227a48.816 48.816 0 013.878.512.75.75 0 11-.231 1.478A47.345 47.345 0 0018 6.324V6.5A3 3 0 0115 9.5v10.75a3 3 0 01-3 3v-10.75a3 3 0 01-3-3V6.5a3 3 0 01-2.93-2.931 47.345 47.345 0 00-1.952-.284.75.75 0 01-.231-1.478 48.816 48.816 0 013.878-.512V4.478c0-.773.67-1.401 1.49-1.401h6.02c.82 0 1.49.628 1.49 1.401zM10.5 12a.75.75 0 01.75-.75h1.5a.75.75 0 01.75.75v7.5a.75.75 0 01-.75.75h-1.5a.75.75 0 01-.75-.75v-7.5z" clip-rule="evenodd" />
+                            </svg>
+                        </button>
+                    </div>
+                `;
+                taskList.appendChild(taskItem);
+            });
+        }
+
+        function getPriorityClass(priority) {
+            switch (priority) {
+                case 'High': return 'priority-high';
+                case 'Medium': return 'priority-medium';
+                case 'Low': return 'priority-low';
+                default: return '';
+            }
+        }
+
+        function renderSchedule() {
+            scheduleDisplay.innerHTML = '';
+            if (schedule.length === 0) {
+                noScheduleMessage.classList.remove('hidden');
+                return;
+            }
+            noScheduleMessage.classList.add('hidden');
+
+            schedule.forEach(item => {
+                const scheduleItem = document.createElement('div');
+                scheduleItem.className = `glass-card p-4 rounded-lg flex items-center justify-between transition-all duration-200 ${item.type === 'task' ? 'hover:scale-[1.01]' : ''}`;
+                const priorityClass = item.type === 'task' ? getPriorityClass(item.priority) : 'text-gray-400';
+
+                scheduleItem.innerHTML = `
+                    <div class="flex-grow">
+                        <p class="text-sm text-gray-400">${formatTime(item.startTime)} - ${formatTime(item.endTime)}</p>
+                        <p class="text-lg font-medium text-white ${item.type === 'task' ? '' : 'italic'}">${item.name}</p>
+                        ${item.type === 'task' ? `<span class="text-xs ${priorityClass}">${item.priority} Priority</span>` : ''}
+                    </div>
+                    ${item.type === 'task' ? `
+                        <button data-id="${item.id}" class="complete-scheduled-task-btn p-2 rounded-full hover:bg-green-600 hover:bg-opacity-20 text-green-400 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 ml-4">
+                            <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                                <path fill-rule="evenodd" d="M19.916 4.626a.75.75 0 01.208 1.04l-9 13.5a.75.75 0 01-1.154.114l-6-6a.75.75 0 011.06-1.06l5.353 5.353 8.493-12.739a.75.75 0 011.04-.208z" clip-rule="evenodd" />
+                            </svg>
+                        </button>
+                    ` : ''}
+                `;
+                scheduleDisplay.appendChild(scheduleItem);
+            });
+        }
+
+        // --- Event Handlers ---
+        function showSection(sectionId) {
+            tasksSection.classList.add('hidden');
+            scheduleSection.classList.add('hidden');
+            tasksTab.classList.remove('active');
+            scheduleTab.classList.remove('active');
+
+            document.getElementById(`${sectionId}Section`).classList.remove('hidden');
+            document.getElementById(`${sectionId}Tab`).classList.add('active');
+
+            // If switching to tasks, re-render tasks to ensure up-to-date.
+            if (sectionId === 'tasks') {
+                renderTasks();
+            }
+        }
+
+        function addTask() {
+            const name = taskNameInput.value.trim();
+            const priority = taskPriorityInput.value;
+            const duration = parseInt(taskDurationInput.value, 10);
+
+            if (!name || isNaN(duration) || duration <= 0) {
+                showToast('Please enter a valid task name and duration.', 3000);
+                return;
+            }
+
+            const newTask = {
+                id: Date.now(), // Unique ID
+                name,
+                priority,
+                duration, // in minutes
+                completed: false
+            };
+
+            tasks.push(newTask);
+            saveTasks();
+            renderTasks();
+            showToast('Task added successfully!', 2000);
+
+            // Clear form
+            taskNameInput.value = '';
+            taskPriorityInput.value = 'Medium';
+            taskDurationInput.value = '60';
+        }
+
+        function toggleTaskCompletion(taskId) {
+            const taskIndex = tasks.findIndex(t => t.id === taskId);
+            if (taskIndex > -1) {
+                tasks[taskIndex].completed = !tasks[taskIndex].completed;
+                saveTasks();
+                renderTasks();
+                showToast(tasks[taskIndex].completed ? 'Task completed!' : 'Task uncompleted.', 2000);
+            }
+        }
+
+        function editTask(taskId) {
+            const task = tasks.find(t => t.id === taskId);
+            if (!task) return;
+
+            const newName = prompt('Edit task name:', task.name);
+            if (newName !== null && newName.trim() !== '') {
+                task.name = newName.trim();
+            }
+
+            const newPriority = prompt('Edit task priority (High, Medium, Low):', task.priority);
+            if (newPriority !== null && ['High', 'Medium', 'Low'].includes(newPriority)) {
+                task.priority = newPriority;
+            }
+
+            const newDuration = parseInt(prompt('Edit task duration (minutes):', task.duration), 10);
+            if (!isNaN(newDuration) && newDuration > 0) {
+                task.duration = newDuration;
+            }
+
+            saveTasks();
+            renderTasks();
+            showToast('Task updated!', 2000);
+        }
+
+        function deleteTask(taskId) {
+            if (confirm('Are you sure you want to delete this task?')) {
+                tasks = tasks.filter(t => t.id !== taskId);
+                saveTasks();
+                renderTasks();
+                showToast('Task deleted.', 2000);
+            }
+        }
+
+        function completeScheduledTask(taskId) {
+            toggleTaskCompletion(taskId); // Mark as completed in the main tasks list
+            generateSchedule(); // Regenerate schedule to reflect completion
+            showToast('Scheduled task marked as completed!', 2000);
+        }
+
+        // --- AI Schedule Generation Logic (Simplified Heuristic) ---
+        function generateSchedule() {
+            const workStartTimeStr = workStartTimeInput.value;
+            const workEndTimeStr = workEndTimeInput.value;
+            const breakDuration = parseInt(breakDurationInput.value, 10);
+
+            const today = new Date();
+            const startHour = parseInt(workStartTimeStr.split(':')[0], 10);
+            const startMinute = parseInt(workStartTimeStr.split(':')[1], 10);
+            const endHour = parseInt(workEndTimeStr.split(':')[0], 10);
+            const endMinute = parseInt(workEndTimeStr.split(':')[1], 10);
+
+            let currentTime = new Date(today.getFullYear(), today.getMonth(), today.getDate(), startHour, startMinute);
+            const workEndTime = new Date(today.getFullYear(), today.getMonth(), today.getDate(), endHour, endMinute);
+
+            const availableTasks = tasks.filter(t => !t.completed).sort((a, b) => {
+                const priorityOrder = { 'High': 3, 'Medium': 2, 'Low': 1 };
+                return priorityOrder[b.priority] - priorityOrder[a.priority]; // High priority first
+            });
+
+            schedule = [];
+            let taskIndex = 0;
+            let totalWorkDuration = 0; // Track total work duration for break insertion
+
+            while (currentTime < workEndTime && (taskIndex < availableTasks.length || totalWorkDuration > 0)) {
+                // Check if it's time for a break (e.g., after 2 hours of work)
+                if (totalWorkDuration >= 120 && breakDuration > 0) { // 120 minutes = 2 hours
+                    const breakEndTime = new Date(currentTime.getTime() + breakDuration * 60 * 1000);
+                    if (breakEndTime <= workEndTime) {
+                        schedule.push({
+                            id: `break-${Date.now()}-${schedule.length}`,
+                            name: 'Short Break',
+                            type: 'break',
+                            startTime: new Date(currentTime),
+                            endTime: breakEndTime
+                        });
+                        currentTime = breakEndTime;
+                        totalWorkDuration = 0; // Reset work duration after a break
+                        continue; // Skip to next iteration to schedule tasks
+                    }
+                }
+
+                if (taskIndex < availableTasks.length) {
+                    const task = availableTasks[taskIndex];
+                    const taskEndTime = new Date(currentTime.getTime() + task.duration * 60 * 1000);
+
+                    if (taskEndTime <= workEndTime) {
+                        schedule.push({
+                            id: task.id,
+                            name: task.name,
+                            priority: task.priority,
+                            duration: task.duration,
+                            type: 'task',
+                            startTime: new Date(currentTime),
+                            endTime: taskEndTime
+                        });
+                        currentTime = taskEndTime;
+                        totalWorkDuration += task.duration;
+                        taskIndex++;
+                    } else {
+                        // Task won't fit entirely, try next task or stop
+                        taskIndex++; // Move to next task, this one might be too long
+                    }
+                } else {
+                    // No more tasks, or remaining tasks don't fit
+                    break;
+                }
+            }
+
+            // If there's still time left and a break wasn't inserted, add a final break/free time
+            if (currentTime < workEndTime) {
+                schedule.push({
+                    id: `free-${Date.now()}-${schedule.length}`,
+                    name: 'Free Time / Buffer',
+                    type: 'free',
+                    startTime: new Date(currentTime),
+                    endTime: new Date(workEndTime)
+                });
+            }
+
+            renderSchedule();
+            showToast('Schedule generated by AI!', 2000);
+        }
+
+        // --- Event Listeners ---
+        addTaskBtn.addEventListener('click', addTask);
+        generateScheduleBtn.addEventListener('click', generateSchedule);
+
+        taskList.addEventListener('click', (e) => {
+            const target = e.target;
+            const taskId = parseInt(target.closest('li')?.querySelector('input[type="checkbox"]')?.dataset.id ||
+                                    target.closest('button')?.dataset.id, 10);
+
+            if (isNaN(taskId)) return;
+
+            if (target.type === 'checkbox') {
+                toggleTaskCompletion(taskId);
+            } else if (target.closest('.edit-task-btn')) {
+                editTask(taskId);
+            } else if (target.closest('.delete-task-btn')) {
+                deleteTask(taskId);
+            }
+        });
+
+        scheduleDisplay.addEventListener('click', (e) => {
+            const target = e.target;
+            const taskId = parseInt(target.closest('button')?.dataset.id, 10);
+
+            if (isNaN(taskId)) return;
+
+            if (target.closest('.complete-scheduled-task-btn')) {
+                completeScheduledTask(taskId);
+            }
+        });
+
+        fabAddTask.addEventListener('click', () => {
+            showSection('tasks'); // Switch to tasks tab
+            taskNameInput.focus(); // Focus on the task input
+            window.scrollTo({ top: 0, behavior: 'smooth' }); // Scroll to top to see input
+        });
+
+        // Initial render
+        document.addEventListener('DOMContentLoaded', () => {
+            renderTasks();
+            showSection('tasks'); // Default to tasks section
+        });
+
+    </script>
+</body>
+</html>
