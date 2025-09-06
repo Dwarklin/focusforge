@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI-Powered Focus Forge - Smart Schedule Management</title>
+    <title>AI-Powered TimeFlow - Smart Schedule Management</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Google Fonts for a modern look (optional, but enhances "fancy") -->
@@ -180,9 +180,9 @@
         <header class="flex items-center justify-between py-4 mb-6">
             <h1 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight flex items-center">
                 <svg class="icon mr-2 text-accent-color" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                    <path fill-rule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zM12.75 6a.75.75 极 00-1.5 0v6c0 .414.168.81.44 1.08l3.75 3.75a.75.75 0 101.06-1.06L13.5 11.25V6z" clip-rule="evenodd" />
+                    <path fill-rule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zM12.75 6a.75.75 0 00-1.5 0v6c0 .414.168.81.44 1.08l3.75 3.75a.75.75 0 101.06-1.06L13.5 11.25V6z" clip-rule="evenodd" />
                 </svg>
-                Focus Forge
+                TimeFlow
             </h1>
             <div class="flex items-center space-x-2">
                 <!-- Analytics Link -->
@@ -192,11 +192,16 @@
                     </svg>
                 </a>
                 <!-- Tutorial Link -->
-                <a href="tutorial.html" class="p-2 rounded-full hover:bg-white hover:bg-opacity-10 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-accent-color" title="Tutorial">
-                    <svg class="icon text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                        <path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 01.67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 11-.671-1.34l.041-.022zM12 9a.75.75 0 100-1.5.75.75 0 000 1.5z" clip-rule="evenodd" />
-                    </svg>
-                </a>
+                <div class="relative group">
+                    <a href="tutorial.html" class="p-2 rounded-full hover:bg-white hover:bg-opacity-10 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-accent-color" title="Tutorial">
+                        <svg class="icon text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                            <path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 01.67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 11-.671-1.34l.041-.022zM12 9a.75.75 0 100-1.5.75.75 0 000 1.5z" clip-rule="evenodd" />
+                        </svg>
+                    </a>
+                    <span class="absolute top-full right-0 mt-2 w-max px-3 py-1 text-sm font-medium text-white bg-gray-800 rounded-md shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none whitespace-nowrap">
+                        How to use
+                    </span>
+                </div>
                 <!-- User/Settings Icon (Placeholder) -->
             <button class="p-2 rounded-full hover:bg-white hover:bg-opacity-10 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-accent-color">
                 <svg class="icon text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
